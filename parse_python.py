@@ -7,6 +7,11 @@ import ast
 from pyparsing import unicode
 
 
+"""
+This file is a modified version of the code presented here:
+https://www.sri.inf.ethz.ch/py150
+"""
+
 def PrintUsage():
     sys.stderr.write("""
 Usage:
@@ -18,8 +23,8 @@ Usage:
 
 def parse_file(strr):
     global c, d
-    # print(type(read_file_to_string(filename)))
-    # There were cases when the code was written in Py 2
+
+    # Handle cases with python 2 code
     try:
         tree = ast.parse(strr)
     except SyntaxError:
@@ -53,8 +58,6 @@ def parse_file(strr):
         json_tree.append(json_node)
         json_node['type'] = type(node).__name__
         children = []
-        # for child in ast.iter_child_nodes(node):
-        #     print(node, "sss", child)
         if isinstance(node, ast.Name):
             json_node['value'] = node.id
         elif isinstance(node, ast.Num):
@@ -80,7 +83,6 @@ def parse_file(strr):
 
         # Process children.
         if isinstance(node, ast.For):
-            # print(node.target, node.iter)
             children.append(traverse(node.target))
             children.append(traverse(node.iter))
             children.append(traverse_list(node.body, 'body'))
@@ -134,10 +136,3 @@ def parse_file(strr):
 
     traverse(tree)
     return json.dumps(json_tree, separators=(',', ':'), ensure_ascii=False)
-
-
-if __name__ == "__main__":
-    try:
-        res = parse_file('test_file.py')
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        pass

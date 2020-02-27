@@ -6,22 +6,24 @@ import itertools
 import tqdm
 import joblib
 import numpy as np
-import ast as assss
-import yaml
 
 from pathlib import Path
-from sklearn import model_selection as sklearn_model_selection
+'''
+This code is a modified version of the code that is presented here: 
+https://github.com/tech-srl/code2seq/tree/master/Python150kExtractor
+
+'''
 
 METHOD_NAME, NUM = 'METHODNAME', 'NUM'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', type=str)
+parser.add_argument('--data_dir', type=str, default='./past_res')
 parser.add_argument('--valid_p', type=float, default=0.2)
 parser.add_argument('--max_path_length', type=int, default=8)
 parser.add_argument('--max_path_width', type=int, default=2)
 parser.add_argument('--use_method_name', type=bool, default=True)
 parser.add_argument('--use_nums', type=bool, default=True)
-parser.add_argument('--output_dir', type=str)
+parser.add_argument('--output_file', type=str, default='./extract_res/result.txt')
 parser.add_argument('--n_jobs', type=int, default=multiprocessing.cpu_count())
 parser.add_argument('--seed', type=int, default=239)
 
@@ -158,9 +160,6 @@ def __collect_samples(ast, args):
 def __collect_all_and_save(asts, args, output_file):
     parallel = joblib.Parallel(n_jobs=args.n_jobs)
     func = joblib.delayed(__collect_samples)
-    print(type(asts))
-    print(asts[0])
-    print(type(asts[0]))
     samples = parallel(func(ast, args) for ast in tqdm.tqdm(asts))
     samples = list(itertools.chain.from_iterable(samples))
 
@@ -173,24 +172,11 @@ def main():
     args = parser.parse_args()
     np.random.seed(args.seed)
 
-    # data_dir = Path(args.data_dir)
-    trains = __collect_asts('.\\result\\output.json')
-    # evals = __collect_asts(data_dir / 'python50k_eval.json')
-
-    train, valid = sklearn_model_selection.train_test_split(
-        trains,
-        test_size=args.valid_p,
-    )
-    # test = evals
-
-    output_dir = Path('.\\output.txt')
+    data = __collect_asts(f'{args.data_dir}/result.json')
+    output_dir = Path(args.output_file[:args.output_file.rfind("/")])
     output_dir.mkdir(exist_ok=True)
-    for split_name, split in zip(
-            ('train', 'valid', 'test'),
-            (train, valid, train),
-    ):
-        output_file = output_dir / f'{split_name}_output_file.txt'
-        __collect_all_and_save(split, args, output_file)
+    output_file = args.output_file
+    __collect_all_and_save(data, args, output_file)
 
 
 if __name__ == '__main__':

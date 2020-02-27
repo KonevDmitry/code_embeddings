@@ -1,0 +1,4 @@
+joblib==0.14.1
+numpy==1.18.1
+pyparsing==2.4.6
+tqdm==4.43.0
