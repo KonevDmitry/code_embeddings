@@ -30,7 +30,7 @@ parser.add_argument('--seed', type=int, default=239)
 
 def __collect_asts(json_file):
     asts = []
-    with open(json_file, 'r', encoding='utf-8') as f:
+    with open(json_file, 'r', encoding='utf-8', errors='replace') as f:
         for line in f:
             ast = json.loads(line.strip())
             asts.append(ast)
