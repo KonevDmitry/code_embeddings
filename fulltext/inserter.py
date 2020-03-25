@@ -20,5 +20,5 @@ def read_files(path):
 
 if __name__ == '__main__':
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-    path = "../resources/python/python/final/jsonl/train/*" if len(sys.argv)<2 else sys.argv[1]
+    path = "../resources/python/python/final/jsonl/train/*.jsonl" if len(sys.argv)<2 else sys.argv[1]
     read_files(path)
