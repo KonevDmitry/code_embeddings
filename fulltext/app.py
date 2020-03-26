@@ -1,3 +1,4 @@
+import json
 import threading
 
 from flask import Flask
@@ -20,7 +21,7 @@ def search():
 @app.route('/get_doc', methods=['GET'])
 def get_doc():
     if request.method == 'GET':
-        return render_template('doc.html', doc=search.get_doc())
+        return render_template('doc.html', doc=fulltext.search.get_doc(es, request.args.get("docid")))
     return 'smt'
 
 

@@ -23,6 +23,10 @@ def search_python(es,query):
     # hit['_source']['about']
     return res['hits']['hits'][:10]
 
+def get_doc(es, id):
+    return es.get(index='python', doc_type='func', id=id)
+
+
 if __name__ == '__main__':
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
     for i in search_python(es, "predict"):

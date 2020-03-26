@@ -10,12 +10,10 @@
     <input type="submit" value="Search">
 </form>
     {% for i in range(10)%}
-        <p>{{ i }}.</p>
-        {{ docs[i]['_source'].func_name }}
+        {{ i }}.
+        <a href="{{ url_for('get_doc', docid=docs[i]._id) }}">{{ docs[i]['_source'].func_name }}</a>
         <br>
         {{ docs[i]['_source'].language }}
-        <br>
-        {{ docs[i]['_source'].code }}
         <br>
     {% endfor %}
 </body>
