@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+</head>
+<body>
+<form action="{{ url_for('search')}}" method="get">
+    <input type="text" name="query">
+    <input type="submit" value="Search">
+</form>
+    {% for i in range(10)%}
+        <p>{{ i }}.</p>
+        {{ docs[i]['_source'].func_name }}
+        <br>
+        {{ docs[i]['_source'].language }}
+        <br>
+        {{ docs[i]['_source'].code }}
+        <br>
+    {% endfor %}
+</body>
+
+</html>
+
