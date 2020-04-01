@@ -1,6 +1,5 @@
 import json
 
-import unidecode as unidecode
 from multiprocessing import Process
 import parse_python as pp
 import os

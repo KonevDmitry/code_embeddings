@@ -173,6 +173,7 @@ def main():
     args = parser.parse_args()
     np.random.seed(args.seed)
     files = os.listdir(args.data_dir)
+    os.makedirs("./extract_res", exist_ok=True)
     for file in files:
         print(f'{args.data_dir}/{file}')
         data = __collect_asts(f'{args.data_dir}/{file}')
