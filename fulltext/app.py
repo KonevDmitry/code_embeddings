@@ -10,6 +10,9 @@ es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
 app = Flask(__name__)
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 @app.route('/search', methods=['GET'])
 def search():
@@ -26,7 +29,7 @@ def get_doc():
 
 
 @app.route('/')
-def hello_world(name=None):
+def main_page(name=None):
     return render_template('main.html', name=name)
 
 
