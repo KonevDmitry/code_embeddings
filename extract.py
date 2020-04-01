@@ -1,4 +1,5 @@
 import argparse
+import os
 import re
 import json
 import multiprocessing
@@ -23,7 +24,7 @@ parser.add_argument('--max_path_length', type=int, default=8)
 parser.add_argument('--max_path_width', type=int, default=2)
 parser.add_argument('--use_method_name', type=bool, default=True)
 parser.add_argument('--use_nums', type=bool, default=True)
-parser.add_argument('--output_file', type=str, default='./extract_res/result.txt')
+parser.add_argument('--output_file', type=str, default='./extract_res')
 parser.add_argument('--n_jobs', type=int, default=multiprocessing.cpu_count())
 parser.add_argument('--seed', type=int, default=239)
 
@@ -171,12 +172,14 @@ def __collect_all_and_save(asts, args, output_file):
 def main():
     args = parser.parse_args()
     np.random.seed(args.seed)
-
-    data = __collect_asts(f'{args.data_dir}/result.json')
-    output_dir = Path(args.output_file[:args.output_file.rfind("/")])
-    output_dir.mkdir(exist_ok=True)
-    output_file = args.output_file
-    __collect_all_and_save(data, args, output_file)
+    files = os.listdir(args.data_dir)
+    for file in files:
+        print(f'{args.data_dir}/{file}')
+        data = __collect_asts(f'{args.data_dir}/{file}')
+        output_dir = Path(args.output_file[:args.output_file.rfind("/")])
+        output_dir.mkdir(exist_ok=True)
+        output_file = args.output_file + "/" + file.split(".jsonl")[0] + ".txt"
+        __collect_all_and_save(data, args, output_file)
 
 
 if __name__ == '__main__':
