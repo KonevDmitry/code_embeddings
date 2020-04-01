@@ -1,27 +1,17 @@
 from elasticsearch import Elasticsearch
 
 
-def search_python(es,query):
+def search_python(es, query):
     res = es.search(index='python', doc_type='func', body={
-        'query': {
-            "bool": {
-              "must": [
-                # {
-                #   "match": {
-                #     "docstring": query
-                #   }
-                # },
-                {
-                  "match": {
-                    "code": query
-                  }
-                }
-              ]
+        "query": {
+            "multi_match": {
+                "query": query,
+                "fields": ["func_name", "original_string", "language"]
             }
         }
     })
-    # hit['_source']['about']
     return res['hits']['hits'][:10]
+
 
 def get_doc(es, id):
     return es.get(index='python', doc_type='func', id=id)
