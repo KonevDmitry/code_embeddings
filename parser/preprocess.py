@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 import numpy as np
 
-import common
+from parser import common
 
 '''
 This script preprocesses the data from MethodPaths. It truncates methods with too many contexts,

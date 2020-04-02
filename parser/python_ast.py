@@ -49,4 +49,4 @@ def read_data(inp_dir, out_dir):
 
 
 if __name__ == '__main__':
-    read_data("./input", "./past_res")
+    read_data("../resources/input", "../resources/past_res")

@@ -18,7 +18,7 @@ https://github.com/tech-srl/code2seq/tree/master/Python150kExtractor
 METHOD_NAME, NUM = 'METHODNAME', 'NUM'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', type=str, default='./past_res')
+parser.add_argument('--data_dir', type=str, default='../resources/past_res')
 parser.add_argument('--valid_p', type=float, default=0.2)
 parser.add_argument('--max_path_length', type=int, default=8)
 parser.add_argument('--max_path_width', type=int, default=2)
@@ -172,8 +172,9 @@ def __collect_all_and_save(asts, args, output_file):
 def main():
     args = parser.parse_args()
     np.random.seed(args.seed)
+    os.makedirs(args.data_dir, exist_ok=True)
     files = os.listdir(args.data_dir)
-    os.makedirs("./extract_res", exist_ok=True)
+    os.makedirs("../resources/extract_res", exist_ok=True)
     for file in files:
         print(f'{args.data_dir}/{file}')
         data = __collect_asts(f'{args.data_dir}/{file}')
