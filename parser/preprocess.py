@@ -2,8 +2,7 @@ import pickle
 from argparse import ArgumentParser
 
 import numpy as np
-
-from parser import common
+import common
 
 '''
 This script preprocesses the data from MethodPaths. It truncates methods with too many contexts,
