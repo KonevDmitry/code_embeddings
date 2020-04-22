@@ -5,7 +5,7 @@ MAX_DATA_CONTEXTS=1000
 SUBTOKEN_VOCAB_SIZE=186277
 TARGET_VOCAB_SIZE=26347
 
-data_dir=../resources/concatenated
+data_dir=../resources/concatenated2
 mkdir -p "${data_dir}"
 train_data_file=$data_dir/train_output_file.txt
 valid_data_file=$data_dir/valid_output_file.txt

@@ -74,7 +74,6 @@ class ModelRunner:
 
         print('Start training loop...')
         dataset = self.train_dataset_reader.get_dataset()
-
         if self.config.USE_MOMENTUM:
             lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
                 initial_learning_rate=0.01,
@@ -113,13 +112,14 @@ class ModelRunner:
         for iteration in range(self.config.NUM_EPOCHS):
             pbar = tqdm.tqdm(total=self.num_training_examples)
             for input_tensors in dataset:
-                target_lengths = input_tensors[reader.TARGET_LENGTH_KEY]
-                target_index = input_tensors[reader.TARGET_INDEX_KEY]
+                print(input_tensors)
+                # print("tup:", tup)
+                target_lengths = input_tensors[0][reader.TARGET_LENGTH_KEY]
+                target_index = input_tensors[0][reader.TARGET_INDEX_KEY]
                 batch_size = tf.shape(target_index)[0]
                 with tf.GradientTape() as tape:
                     batched_contexts = self.model.run_encoder(input_tensors, is_training=True)
                     outputs, _ = self.model.run_decoder(batched_contexts, input_tensors, is_training=True)
-
                     logits = outputs.rnn_output  # (batch, max_output_length, dim * 2 + rnn_size)
                     crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_index, logits=logits)
                     target_words_nonzero = tf.sequence_mask(target_lengths + 1,
@@ -217,7 +217,7 @@ class ModelRunner:
             start_time = time.time()
 
             for input_tensors in dataset:
-                true_target_strings = input_tensors[reader.TARGET_STRING_KEY]
+                true_target_strings = input_tensors[0][reader.TARGET_STRING_KEY]
 
                 batched_contexts = self.model.run_encoder(input_tensors, is_training=False)
                 outputs, final_states = self.model.run_decoder(batched_contexts, input_tensors, is_training=False)

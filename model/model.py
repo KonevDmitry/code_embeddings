@@ -95,13 +95,13 @@ class Model(tf.Module):
 
     @tf.function
     def run_encoder(self, input_tensors, is_training):
-        path_source_indices = input_tensors[reader.PATH_SOURCE_INDICES_KEY]
-        node_indices = input_tensors[reader.NODE_INDICES_KEY]
-        path_target_indices = input_tensors[reader.PATH_TARGET_INDICES_KEY]
-        valid_context_mask = input_tensors[reader.VALID_CONTEXT_MASK_KEY]
-        path_source_lengths = input_tensors[reader.PATH_SOURCE_LENGTHS_KEY]
-        path_lengths = input_tensors[reader.PATH_LENGTHS_KEY]
-        path_target_lengths = input_tensors[reader.PATH_TARGET_LENGTHS_KEY]
+        path_source_indices = input_tensors[0][reader.PATH_SOURCE_INDICES_KEY]
+        node_indices = input_tensors[0][reader.NODE_INDICES_KEY]
+        path_target_indices = input_tensors[0][reader.PATH_TARGET_INDICES_KEY]
+        valid_context_mask = input_tensors[0][reader.VALID_CONTEXT_MASK_KEY]
+        path_source_lengths = input_tensors[0][reader.PATH_SOURCE_LENGTHS_KEY]
+        path_lengths = input_tensors[0][reader.PATH_LENGTHS_KEY]
+        path_target_lengths = input_tensors[0][reader.PATH_TARGET_LENGTHS_KEY]
 
         batched_contexts = self.compute_contexts(subtoken_vocab=self.subtoken_vocab,
                                                  nodes_vocab=self.nodes_vocab,
@@ -122,8 +122,8 @@ class Model(tf.Module):
     def run_decoder(self, batched_contexts, input_tensors, is_training):
         self.setup_attention_memory(batched_contexts)
 
-        target_index = input_tensors[reader.TARGET_INDEX_KEY]
-        valid_context_mask = input_tensors[reader.VALID_CONTEXT_MASK_KEY]
+        target_index = input_tensors[0][reader.TARGET_INDEX_KEY]
+        valid_context_mask = input_tensors[0][reader.VALID_CONTEXT_MASK_KEY]
         batch_size = tf.shape(target_index)[0]
         outputs, final_states = self.decode_outputs(target_words_vocab=self.target_words_vocab,
                                                     target_input=target_index,

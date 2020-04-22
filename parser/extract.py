@@ -174,7 +174,7 @@ def main():
     np.random.seed(args.seed)
     os.makedirs(args.data_dir, exist_ok=True)
     files = os.listdir(args.data_dir)
-    os.makedirs("../resources/extract_res", exist_ok=True)
+    os.makedirs(args.output_file, exist_ok=True)
     for file in files:
         print(f'{args.data_dir}/{file}')
         data = __collect_asts(f'{args.data_dir}/{file}')

@@ -1,5 +1,4 @@
 import glob
-import json
 import os
 import sys
 
@@ -19,5 +18,4 @@ if __name__ == '__main__':
                 fname = f"{input_dir}/python_{typ}_{i}.jsonl"
                 with open(fname) as infile:
                     for line in infile:
-                        a = json.loads(line)
-                        outfile.write(json.dumps({"docstring":a["docstring"], 'code': a["code"]}))
+                        outfile.write(line)

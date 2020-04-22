@@ -1,12 +1,17 @@
+import ast
+import json
 import os
 
 import _pickle as pickle
 import numpy as np
 import tensorflow as tf
+import tqdm
 
 from args import read_args
 from common import Common
 from config import Config
+import pandas as pd
+import tensorflow_hub as hub
 
 TARGET_INDEX_KEY = 'TARGET_INDEX_KEY'
 TARGET_STRING_KEY = 'TARGET_STRING_KEY'
@@ -83,7 +88,7 @@ class Reader:
         word = row_parts[0]  # (, )
 
         if not self.is_evaluating and self.config.RANDOM_CONTEXTS:
-            all_contexts = tf.stack(row_parts[1:])
+            all_contexts = tf.stack(row_parts[1:-3])
             all_contexts_padded = tf.concat([all_contexts, [self.context_pad]], axis=-1)
             index_of_blank_context = tf.where(tf.equal(all_contexts_padded, self.context_pad))
             num_contexts_per_example = tf.reduce_min(index_of_blank_context)
@@ -98,7 +103,6 @@ class Reader:
         # contexts: (max_contexts, )
         split_contexts = tf.strings.split(contexts, sep=',')
         sparse_split_contexts = split_contexts.to_sparse()
-
         dense_split_contexts = tf.reshape(
             tf.sparse.to_dense(sp_input=sparse_split_contexts, default_value=Common.PAD),
             shape=[self.config.MAX_CONTEXTS, 3])  # (batch, max_contexts, 3)
@@ -184,16 +188,49 @@ class Reader:
         return self.dataset
 
     def init_dataset(self):
+        max_len=300
         self.dataset = tf.data.experimental.CsvDataset(self.file_path, record_defaults=self.record_defaults,
                                                        field_delim=' ',
                                                        use_quote_delim=False, buffer_size=self.config.CSV_BUFFER_SIZE)
-        if not self.is_evaluating:
-            self.dataset = self.dataset.shuffle(self.config.SHUFFLE_BUFFER_SIZE, reshuffle_each_iteration=True)
 
         self.dataset = self.dataset \
-            .map(map_func=self.process_dataset, num_parallel_calls=self.config.READER_NUM_PARALLEL_BATCHES) \
+            .map(map_func=self.process_dataset, num_parallel_calls=self.config.READER_NUM_PARALLEL_BATCHES)
+        ls = []
+        with open("../resources/concatenated2/train_output_file.jsonl", "r", errors='surrogatepass') as file:
+            def append(js, l):
+                try:
+                    ast.parse(f['code'])
+                except SyntaxError:
+                    return
+                code = js['code_tokens'][:max_len]
+                doc = js["docstring_tokens"][:max_len]
+                l.append({'code': np.array(code), "docstring": np.array(doc)})
+
+            for i in tqdm.tqdm(file):
+                try:
+                    f = json.loads(i)
+                except json.decoder.JSONDecodeError:
+                    f1 = i.split("}{")
+                    append(json.loads(f1[0] + '}'), ls)
+                    append(json.loads("{" + f1[1]), ls)
+                    continue
+                append(f, ls)
+        # embed = hub.load("https://tfhub.dev/google/tf2-preview/gnews-swivel-20dim/1")
+        df = pd.DataFrame(ls)
+        df3 = df['docstring']
+        del df
+        df3 = pd.DataFrame(df3.values.tolist())
+        print(df3.head())
+        df3 = df3.fillna('<PAD>')
+        self.dataset2 = tf.data.Dataset.from_tensor_slices(df3.values)
+        self.dataset = tf.data.Dataset.zip((self.dataset, self.dataset2))
+
+        if not self.is_evaluating:
+            self.dataset = self.dataset.shuffle(self.config.SHUFFLE_BUFFER_SIZE, reshuffle_each_iteration=True)
+        self.dataset = self.dataset \
             .batch(batch_size=self.batch_size, drop_remainder=True) \
             .prefetch(tf.data.experimental.AUTOTUNE)
+
 
 
 if __name__ == '__main__':
