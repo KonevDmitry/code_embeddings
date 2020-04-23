@@ -11,7 +11,6 @@ from args import read_args
 from common import Common
 from config import Config
 import pandas as pd
-import tensorflow_hub as hub
 
 TARGET_INDEX_KEY = 'TARGET_INDEX_KEY'
 TARGET_STRING_KEY = 'TARGET_STRING_KEY'
@@ -188,7 +187,7 @@ class Reader:
         return self.dataset
 
     def init_dataset(self):
-        max_len=300
+        max_len=100
         self.dataset = tf.data.experimental.CsvDataset(self.file_path, record_defaults=self.record_defaults,
                                                        field_delim=' ',
                                                        use_quote_delim=False, buffer_size=self.config.CSV_BUFFER_SIZE)

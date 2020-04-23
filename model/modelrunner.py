@@ -5,11 +5,11 @@ import time
 import _pickle as pickle
 import tensorflow as tf
 import tqdm
-from rouge import FilesRouge
 
 import reader
 from model import Model
 from results import *
+import tensorflow_hub as hub
 
 
 class ModelRunner:
@@ -108,21 +108,24 @@ class ModelRunner:
         epochs_no_improve = 0
         multi_batch_start_time = time.time()
         start_time = time.time()
-
+        embed = hub.load("https://tfhub.dev/google/tf2-preview/gnews-swivel-20dim/1")
         for iteration in range(self.config.NUM_EPOCHS):
             pbar = tqdm.tqdm(total=self.num_training_examples)
             for input_tensors in dataset:
-                print(input_tensors)
-                # print("tup:", tup)
+                # print(input_tensors)
                 target_lengths = input_tensors[0][reader.TARGET_LENGTH_KEY]
                 target_index = input_tensors[0][reader.TARGET_INDEX_KEY]
+                print(target_lengths)
                 batch_size = tf.shape(target_index)[0]
                 with tf.GradientTape() as tape:
                     batched_contexts = self.model.run_encoder(input_tensors, is_training=True)
                     outputs, _ = self.model.run_decoder(batched_contexts, input_tensors, is_training=True)
                     logits = outputs.rnn_output  # (batch, max_output_length, dim * 2 + rnn_size)
-                    crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=target_index, logits=logits)
-                    target_words_nonzero = tf.sequence_mask(target_lengths + 1,
+                    embeddings = np.array((map(embed,input_tensors[1].numpy())))
+                    print(logits[0][0])
+                    print(embeddings[0][0])
+                    crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=embeddings, logits=logits)
+                    target_words_nonzero = tf.sequence_mask(99 + 1,
                                                             maxlen=self.config.MAX_TARGET_PARTS + 1, dtype=tf.float32)
                     loss = tf.reduce_sum(crossent * target_words_nonzero) / tf.cast(batch_size, dtype=tf.float32)
 
