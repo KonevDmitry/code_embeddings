@@ -14,7 +14,7 @@ class Config:
         config.TARGET_VOCAB_MAX_SIZE = 27000
         config.EMBEDDINGS_SIZE = 128
         config.RNN_SIZE = 128 * 2  # Two LSTMs to embed paths, each of size 128
-        config.DECODER_SIZE = 320
+        config.DECODER_SIZE = 20
         config.NUM_DECODER_LAYERS = 1
         config.MAX_PATH_LENGTH = 8 + 1
         config.MAX_NAME_PARTS = 5
