@@ -115,14 +115,11 @@ class ModelRunner:
                 # print(input_tensors)
                 target_lengths = input_tensors[0][reader.TARGET_LENGTH_KEY]
                 target_index = input_tensors[0][reader.TARGET_INDEX_KEY]
-                print(target_index)
-                print(target_index.shape)
                 batch_size = tf.shape(target_index)[0]
                 mse = tf.keras.losses.MeanSquaredError()
                 with tf.GradientTape() as tape:
                     batched_contexts = self.model.run_encoder(input_tensors, is_training=True)
                     outputs, final_states = self.model.run_decoder(batched_contexts, input_tensors, is_training=True)
-                    print(final_states)
                     logits = outputs.rnn_output  # (batch, max_output_length, dim * 2 + rnn_size)
                     embeddings = np.array(list(map(embed,input_tensors[1].numpy())))
                     # print(logits)
