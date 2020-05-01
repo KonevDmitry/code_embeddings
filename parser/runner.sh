@@ -2,5 +2,6 @@
 
 #python ./python_ast.py
 #python ./extract.py
-python ./concater.py "" "concatenated2"
-/bin/bash ./preprocess.sh
+#python ./concater_inp.py
+#/bin/bash ./preprocess.sh
+python ./concater.py

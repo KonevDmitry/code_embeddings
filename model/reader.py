@@ -198,17 +198,19 @@ class Reader:
         with open("../resources/concatenated2/train_output_file.jsonl", "r", errors='surrogatepass') as file:
             def append(js, l):
                 try:
-                    ast.parse(f['code'])
+                    ast.parse(js['code'])
                 except SyntaxError:
                     return
-                code = js['code_tokens'][:max_len]
-                doc = js["docstring_tokens"][:max_len]
+                code = js['code'][:max_len]
+                doc = js["docstring"][:max_len]
                 l.append({'code': np.array(code), "docstring": np.array(doc)})
 
             for i in tqdm.tqdm(file):
                 try:
                     f = json.loads(i)
+                    # print(i)
                 except json.decoder.JSONDecodeError:
+                    # print(i)
                     f1 = i.split("}{")
                     append(json.loads(f1[0] + '}'), ls)
                     append(json.loads("{" + f1[1]), ls)
