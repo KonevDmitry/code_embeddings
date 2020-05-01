@@ -202,8 +202,8 @@ class Reader:
                 except SyntaxError:
                     return
                 code = js['code'][:max_len]
-                doc = js["docstring"][:max_len]
-                l.append({'code': np.array(code), "docstring": np.array(doc)})
+                doc = js["docstring_tokens"][:max_len]
+                l.append({'code': np.array(code), "docstring_tokens": np.array(doc)})
 
             for i in tqdm.tqdm(file):
                 try:
@@ -218,11 +218,11 @@ class Reader:
                 append(f, ls)
         # embed = hub.load("https://tfhub.dev/google/tf2-preview/gnews-swivel-20dim/1")
         df = pd.DataFrame(ls)
-        df3 = df['docstring']
+        df3 = df['docstring_tokens']
         del df
         df3 = pd.DataFrame(df3.values.tolist())
-        print(df3.head())
         df3 = df3.fillna('<PAD>')
+        print(df3.head())
         self.dataset2 = tf.data.Dataset.from_tensor_slices(df3.values)
         self.dataset = tf.data.Dataset.zip((self.dataset, self.dataset2))
 

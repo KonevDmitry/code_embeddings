@@ -20,4 +20,4 @@ if __name__ == '__main__':
                 with open(fname) as infile:
                     for line in infile:
                         a = json.loads(line)
-                        outfile.write(json.dumps({"docstring":a["docstring"], 'code': a["code"]})+"\n")
+                        outfile.write(json.dumps({"docstring_tokens":a["docstring_tokens"], 'code': a["code"]})+"\n")
