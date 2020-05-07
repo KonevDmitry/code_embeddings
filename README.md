@@ -11,3 +11,7 @@ To run our program you have to:
 8) From the folder model114/models/python/ copy file pred.txt into the folder resources/input
 9) Run from the folder fulltext file inserter_ast.py
 10) Run the flask app (which is app.py)
+
+The dataset that we used is [CodeSearchNet](https://github.com/github/CodeSearchNet).
+
+If you don't want to train the model yourself, you can [take the one we trained](https://drive.google.com/file/d/15s7_QcD8FB2bhjuf0KX7ptpk5iLeMKDI/view?usp=sharing) for 28 epoch. You can use it for further training or take its pred.txt (which lies in the same folder).
