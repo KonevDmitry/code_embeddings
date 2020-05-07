@@ -9,7 +9,7 @@ import fulltext.search
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
 app = Flask(__name__)
-
+ast = True
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500
@@ -17,7 +17,8 @@ def internal_server_error(e):
 @app.route('/search', methods=['GET'])
 def search():
     if request.method == 'GET':
-        docs = fulltext.search.search_python(es, request.args.get('query'))
+        global ast
+        docs = fulltext.search.search_python(es,ast, request.args.get('query'))
         return render_template('results.html', docs=docs)
     return 'smt'
 
@@ -27,10 +28,18 @@ def get_doc():
         return render_template('doc.html', doc=fulltext.search.get_doc(es, request.args.get("docid")))
     return 'smt'
 
+@app.route('/change_searcher', methods=['GET'])
+def change_searcher(name=None):
+    if request.method == 'GET':
+        global ast
+        ast = not ast
+        return render_template('main.html', name=name, ast=ast)
+    return 'smt'
+
 
 @app.route('/')
 def main_page(name=None):
-    return render_template('main.html', name=name)
+    return render_template('main.html', name=name, ast=ast)
 
 
 # @app.route("/new_doc", methods=['GET', 'POST'])

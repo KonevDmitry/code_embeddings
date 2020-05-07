@@ -3,9 +3,13 @@ import json
 import os
 
 import _pickle as pickle
+
+import gensim as gensim
 import numpy as np
 import tensorflow as tf
 import tqdm
+import gensim
+from nltk import WordNetLemmatizer
 
 from args import read_args
 from common import Common
@@ -187,7 +191,7 @@ class Reader:
         return self.dataset
 
     def init_dataset(self):
-        max_len=100
+        max_len = 100
         self.dataset = tf.data.experimental.CsvDataset(self.file_path, record_defaults=self.record_defaults,
                                                        field_delim=' ',
                                                        use_quote_delim=False, buffer_size=self.config.CSV_BUFFER_SIZE)
@@ -195,15 +199,20 @@ class Reader:
         self.dataset = self.dataset \
             .map(map_func=self.process_dataset, num_parallel_calls=self.config.READER_NUM_PARALLEL_BATCHES)
         ls = []
+        from nltk.stem import PorterStemmer
+
+        stemmer = PorterStemmer()
+        punkt = ", . { } ( ) [ ] \" ' ? ! < > - =".split(" ")
         with open("../resources/concatenated2/train_output_file.jsonl", "r", errors='surrogatepass') as file:
             def append(js, l):
                 try:
                     ast.parse(js['code'])
                 except SyntaxError:
                     return
-                code = js['code'][:max_len]
-                doc = js["docstring_tokens"][:max_len]
-                l.append({'code': np.array(code), "docstring_tokens": np.array(doc)})
+                # code = js['code'][:max_len]
+                doc = js["docstring_tokens"]
+                # l.append({'code': np.array(code), "docstring_tokens": np.array(doc)})
+                l.append([stemmer.stem(word) for word in doc if word not in punkt])
 
             for i in tqdm.tqdm(file):
                 try:
@@ -217,12 +226,20 @@ class Reader:
                     continue
                 append(f, ls)
         # embed = hub.load("https://tfhub.dev/google/tf2-preview/gnews-swivel-20dim/1")
-        df = pd.DataFrame(ls)
-        df3 = df['docstring_tokens']
-        del df
-        df3 = pd.DataFrame(df3.values.tolist())
-        df3 = df3.fillna('<PAD>')
-        print(df3.head())
+
+        # df = pd.DataFrame(ls)
+        # df3 = df['docstring_tokens']
+        # del df
+        # print(df3.head(1)[0])
+        # print(df3.tolist()[:2])
+        model = gensim.models.FastText(ls)
+        ls2 = []
+        for i in ls:
+            su = [0] * model.vector_size
+            for j in i:
+                su += model[j]
+            ls2.append(su)
+        df3 = pd.DataFrame(ls2)
         self.dataset2 = tf.data.Dataset.from_tensor_slices(df3.values)
         self.dataset = tf.data.Dataset.zip((self.dataset, self.dataset2))
 
@@ -231,7 +248,6 @@ class Reader:
         self.dataset = self.dataset \
             .batch(batch_size=self.batch_size, drop_remainder=True) \
             .prefetch(tf.data.experimental.AUTOTUNE)
-
 
 
 if __name__ == '__main__':
@@ -268,7 +284,7 @@ if __name__ == '__main__':
         print('Loaded nodes vocab. size: %d' % nodes_vocab_size)
 
         reader = Reader(subtoken_to_index, target_to_index, node_to_index, config, False)
-        dataset = reader.get_dataset()
+        dataset, _ = reader.get_dataset()
 
         try:
             for output in dataset:

@@ -108,7 +108,12 @@ class ModelRunner:
         epochs_no_improve = 0
         multi_batch_start_time = time.time()
         start_time = time.time()
-        embed = hub.load("https://tfhub.dev/google/tf2-preview/gnews-swivel-20dim/1")
+        model = tf.keras.Sequential([
+            tf.keras.layers.Embedding(4000, 40),
+            tf.keras.layers.GlobalAveragePooling1D(),
+            tf.keras.layers.Dense(16, activation='relu'),
+            tf.keras.layers.Dense(1)
+        ])
         for iteration in range(self.config.NUM_EPOCHS):
             pbar = tqdm.tqdm(total=self.num_training_examples)
             for input_tensors in dataset:
@@ -121,7 +126,6 @@ class ModelRunner:
                     batched_contexts = self.model.run_encoder(input_tensors, is_training=True)
                     outputs, final_states = self.model.run_decoder(batched_contexts, input_tensors, is_training=True)
                     logits = outputs.rnn_output  # (batch, max_output_length, dim * 2 + rnn_size)
-                    embeddings = np.array(list(map(embed,input_tensors[1].numpy())))
                     # print(logits)
                     # print(np.sum(embeddings,axis=2))
                     # print(embeddings.shape)
@@ -130,7 +134,9 @@ class ModelRunner:
                     # target_words_nonzero = tf.sequence_mask(99 + 1,
                     #                                         maxlen=self.config.MAX_TARGET_PARTS + 1, dtype=tf.float32)
                     # loss = tf.reduce_sum(crossent * target_words_nonzero) / tf.cast(batch_size, dtype=tf.float32)
-                    loss = mse(embeddings,logits)
+                    print(input_tensors[1], np.sum(logits,axis=1))
+
+                    loss = tf.losses.mean_squared_error(input_tensors[1], np.sum(logits,axis=1))
 
                 gradients = tape.gradient(loss, self.model.trainable_variables)
                 if self.config.USE_MOMENTUM:
